@@ -38,17 +38,16 @@ jobs:
       - name: Display coverage summary
         run: |
           if [ -f "target/site/jacoco/jacoco.csv" ]; then
-            echo "📊 Cobertura de Código"
-            echo "======================"
+            echo "📊 Cobertura de Código (Valores absolutos)"
+            echo "===================================="
             COVERAGE_LINE=$(tail -n +2 target/site/jacoco/jacoco.csv | head -1)
             IFS=',' read -r -a METRICS <<< "$COVERAGE_LINE"
 
-            echo "→ Instruções: ${METRICS[4]}/${METRICS[3]}"
-            echo "→ Branches: ${METRICS[6]}/${METRICS[5]}"
-            echo "→ Linhas: ${METRICS[8]}/${METRICS[7]}"
-            echo "→ Métodos: ${METRICS[11]}/${METRICS[10]}"
+            echo "→ Instruções cobertas: ${METRICS[4]} (de $(( ${METRICS[3]} + ${METRICS[4]} ))"
+            echo "→ Branches cobertos: ${METRICS[6]} (de $(( ${METRICS[5]} + ${METRICS[6]} ))"
+            echo "→ Linhas cobertas: ${METRICS[8]} (de $(( ${METRICS[7]} + ${METRICS[8]} ))"
+            echo "→ Métodos cobertos: ${METRICS[11]} (de $(( ${METRICS[10]} + ${METRICS[11]} ))"
+
             echo ""
-            echo "Relatório HTML: target/site/jacoco/index.html"
-          else
-            echo "❌ Relatório não encontrado"
+            echo "💡 Dica: Verifique o relatório HTML para detalhes completos"
           fi
