@@ -47,6 +47,7 @@
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
+                        <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
@@ -57,6 +58,10 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>target/jacoco-report</outputDirectory>
+                            <formats>HTML,XML,CSV</formats>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

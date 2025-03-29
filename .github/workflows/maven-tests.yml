@@ -24,19 +24,41 @@ jobs:
 
       - name: Run Checkstyle (Linter)
         run: mvn checkstyle:check
-
       - name: Run tests with coverage
-        run: mvn test jacoco:report --no-transfer-progress
+        run: |
+          mvn clean test jacoco:report
+          # Força a criação da pasta se não existir
+          mkdir -p target/site/jacoco/
 
-      - name: Upload reports
+      - name: Display coverage summary
+        run: |
+          if [ -f "target/site/jacoco/jacoco.csv" ]; then
+            echo "✅ Cobertura de Código"
+            echo "======================"
+            grep -A 3 "COVERAGE SUMMARY" target/site/jacoco/jacoco.csv
+            echo ""
+            echo "Relatório completo disponível em target/site/jacoco/index.html"
+          else
+            echo "❌ Relatório JaCoCo não encontrado em target/site/jacoco/"
+            echo "Arquivos gerados:"
+            find target/ -type f
+          fi
+
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: analysis-reports
+          name: coverage-report
           path: |
             target/site/jacoco/
-            target/checkstyle-result.xml
+            target/jacoco-report/
           retention-days: 3
+      - name: Publish Coverage Report
+        uses: mikepenz/action-jacoco-report@v2
+        if: success()
+        with:
+          paths: target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Display coverage summary
         run: |
           echo "✅ Cobertura de Código"
