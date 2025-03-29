@@ -9,7 +9,7 @@ class ArraySumCheckerTest {
 
     @Test
     void ensureThatReturnArrayWithNegativeNumbersWhenSumDoesNotMatch() {
-        int[] arrayToCheck = { 2, 4, 6, 8, 10 };
+        int[] arrayToCheck = { 2, 8, 6, 4, 10 };
         var sut  = new ArraySumChecker();
         var result = sut.check(arrayToCheck, 5);
         assertEquals(-1, result[0]);
@@ -18,11 +18,11 @@ class ArraySumCheckerTest {
 
     @Test
     void ensureThatReturnArrayWithCorrectNumbersWhenSumMatches() {
-        int[] arrayToCheck = { 1, 4, 5, 7, 8, 16 };
+        int[] arrayToCheck = { 1, 4, 5, 9, 8, 16 };
         var sut  = new ArraySumChecker();
-        var result = sut.check(arrayToCheck, 9);
+        var result = sut.check(arrayToCheck, 12);
         assertEquals(1, result[0]);
-        assertEquals(2, result[1]);
+        assertEquals(4, result[1]);
     }
 
 }
