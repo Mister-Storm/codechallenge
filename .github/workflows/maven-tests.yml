@@ -40,31 +40,15 @@ jobs:
           if [ -f "target/site/jacoco/jacoco.csv" ]; then
             echo "📊 Cobertura de Código"
             echo "======================"
-
-            # Extrai a primeira linha de dados (ignorando o cabeçalho)
             COVERAGE_LINE=$(tail -n +2 target/site/jacoco/jacoco.csv | head -1)
+            IFS=',' read -r -a METRICS <<< "$COVERAGE_LINE"
 
-            if [ -n "$COVERAGE_LINE" ]; then
-              IFS=',' read -r -a METRICS <<< "$COVERAGE_LINE"
-
-              # Calcula porcentagens
-              TOTAL_INSTRUCTIONS=$(( ${METRICS[3]} + ${METRICS[4]} ))
-              TOTAL_BRANCHES=$(( ${METRICS[5]} + ${METRICS[6]} ))
-              TOTAL_LINES=$(( ${METRICS[7]} + ${METRICS[8]} ))
-
-              INSTRUCTION_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ${METRICS[4]}*100/${TOTAL_INSTRUCTIONS}}")
-              BRANCH_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ${METRICS[6]}*100/${TOTAL_BRANCHES}}")
-              LINE_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ${METRICS[8]}*100/${TOTAL_LINES}}")
-
-              echo "→ Cobertura de Instruções: ${INSTRUCTION_COVERAGE}%"
-              echo "→ Cobertura de Branches: ${BRANCH_COVERAGE}%"
-              echo "→ Cobertura de Linhas: ${LINE_COVERAGE}%"
-              echo "→ Métodos cobertos: ${METRICS[11]}/${METRICS[10]}" 
-            else
-              echo "⚠️ Não foi possível extrair dados de cobertura"
-              echo "Conteúdo do CSV:"
-              head -n 3 target/site/jacoco/jacoco.csv
-            fi
-
+            echo "→ Instruções: ${METRICS[4]}/${METRICS[3]}"
+            echo "→ Branches: ${METRICS[6]}/${METRICS[5]}"
+            echo "→ Linhas: ${METRICS[8]}/${METRICS[7]}"
+            echo "→ Métodos: ${METRICS[11]}/${METRICS[10]}"
             echo ""
-            echo "Relatório HTML completo disponível em target/site/j
+            echo "Relatório HTML: target/site/jacoco/index.html"
+          else
+            echo "❌ Relatório não encontrado"
+          fi
