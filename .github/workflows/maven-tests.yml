@@ -40,10 +40,18 @@ jobs:
           if [ -f "target/site/jacoco/jacoco.csv" ]; then
             echo "📊 Cobertura de Código"
             echo "======================"
-            awk -F',' '/GROUP/ {print $2 " - Cobertura: " $4 "%"}' target/site/jacoco/jacoco.csv
+            # Extrai as métricas principais de forma mais robusta
+            grep "GROUP,br" target/site/jacoco/jacoco.csv | awk -F',' '{
+              printf "→ Cobertura de Instruções: %.2f%%\n", $4
+              printf "→ Cobertura de Branches: %.2f%%\n", $5
+              printf "→ Complexidade Ciclomática: %.2f\n", $7
+            }'
+            echo ""
+            echo "Relatório completo disponível em target/site/jacoco/index.html"
           else
-            echo "❌ Relatório não gerado. Verifique se:"
-            echo "1. Há classes em src/main/java"
-            echo "2. Os testes foram executados"
+            echo "❌ Relatório não gerado. Verifique:"
+            echo "1. Se há classes em src/main/java"
+            echo "2. Se os testes foram executados com sucesso"
+            echo "3. Estrutura de pastas:"
             ls -R target/site/ || echo "Nenhum relatório encontrado"
           fi
