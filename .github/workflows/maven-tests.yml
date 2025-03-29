@@ -41,36 +41,30 @@ jobs:
             echo "📊 Cobertura de Código"
             echo "======================"
 
-            # Método mais robusto para extrair métricas
-            COVERAGE_DATA=$(grep "GROUP,.*" target/site/jacoco/jacoco.csv | head -1)
-            if [ -n "$COVERAGE_DATA" ]; then
-              IFS=',' read -r -a metrics <<< "$COVERAGE_DATA"
-              echo "→ Cobertura de Instruções: ${metrics[3]}%"
-              echo "→ Cobertura de Branches: ${metrics[4]}%"
-              echo "→ Cobertura de Linhas: ${metrics[5]}%"
-              echo "→ Complexidade: ${metrics[6]}"
+            # Extrai a primeira linha de dados (ignorando o cabeçalho)
+            COVERAGE_LINE=$(tail -n +2 target/site/jacoco/jacoco.csv | head -1)
+
+            if [ -n "$COVERAGE_LINE" ]; then
+              IFS=',' read -r -a METRICS <<< "$COVERAGE_LINE"
+
+              # Calcula porcentagens
+              TOTAL_INSTRUCTIONS=$(( ${METRICS[3]} + ${METRICS[4]} ))
+              TOTAL_BRANCHES=$(( ${METRICS[5]} + ${METRICS[6]} ))
+              TOTAL_LINES=$(( ${METRICS[7]} + ${METRICS[8]} ))
+
+              INSTRUCTION_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ${METRICS[4]}*100/${TOTAL_INSTRUCTIONS}}")
+              BRANCH_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ${METRICS[6]}*100/${TOTAL_BRANCHES}}")
+              LINE_COVERAGE=$(awk "BEGIN {printf \"%.1f\", ${METRICS[8]}*100/${TOTAL_LINES}}")
+
+              echo "→ Cobertura de Instruções: ${INSTRUCTION_COVERAGE}%"
+              echo "→ Cobertura de Branches: ${BRANCH_COVERAGE}%"
+              echo "→ Cobertura de Linhas: ${LINE_COVERAGE}%"
+              echo "→ Métodos cobertos: ${METRICS[11]}/${METRICS[10]}" 
             else
-              echo "⚠️ Dados de cobertura não encontrados no arquivo CSV"
-              echo "Conteúdo do jacoco.csv:"
+              echo "⚠️ Não foi possível extrair dados de cobertura"
+              echo "Conteúdo do CSV:"
               head -n 3 target/site/jacoco/jacoco.csv
             fi
 
             echo ""
-            echo "Relatório HTML completo disponível em target/site/jacoco/index.html"
-          else
-            echo "❌ Relatório JaCoCo não encontrado em target/site/jacoco/"
-            echo "Verifique se:"
-            echo "1. Existem classes em src/main/java"
-            echo "2. Os testes foram executados com sucesso"
-            echo "3. A configuração do JaCoCo no pom.xml está correta"
-          fi
-      - name: Debug - 
-        run: |
-          echo "=== Arquivos gerados ==="
-          find target/site/jacoco/ -type f | xargs ls -la
-          echo ""
-          echo "=== Primeiras linhas do CSV ==="
-          head -n 5 target/site/jacoco/jacoco.csv || echo "Arquivo CSV não encontrado"
-          echo ""
-          echo "=== Conteúdo do jacoco.exec ==="
-          ls -la target/jacoco.exec || echo "Arquivo jacoco.exec não encontrado"
+            echo "Relatório HTML completo disponível em target/site/j
