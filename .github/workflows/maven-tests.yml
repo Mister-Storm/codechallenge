@@ -35,19 +35,26 @@ jobs:
           path: target/site/jacoco/
           retention-days: 3
 
-      - name: Display coverage summary
+      - name: Display accurate coverage
         run: |
           if [ -f "target/site/jacoco/jacoco.csv" ]; then
-            echo "📊 Cobertura de Código (Valores absolutos)"
-            echo "===================================="
-            COVERAGE_LINE=$(tail -n +2 target/site/jacoco/jacoco.csv | head -1)
-            IFS=',' read -r -a METRICS <<< "$COVERAGE_LINE"
+            echo "📊 Cobertura Real"
+            echo "================="
 
-            echo "→ Instruções cobertas: ${METRICS[4]} (de $(( ${METRICS[3]} + ${METRICS[4]} ))"
-            echo "→ Branches cobertos: ${METRICS[6]} (de $(( ${METRICS[5]} + ${METRICS[6]} ))"
-            echo "→ Linhas cobertas: ${METRICS[8]} (de $(( ${METRICS[7]} + ${METRICS[8]} ))"
-            echo "→ Métodos cobertos: ${METRICS[11]} (de $(( ${METRICS[10]} + ${METRICS[11]} ))"
+            # Extrai dados da sua classe específica
+            CLASS_DATA=$(grep "ArraySumChecker" target/site/jacoco/jacoco.csv)
+            IFS=',' read -r -a METRICS <<< "$CLASS_DATA"
+
+            echo "Método Principal:"
+            echo "----------------"
+            echo "→ Instruções: ${METRICS[4]}/${METRICS[3]} (${METRICS[4]} cobertas)"
+            echo "→ Branches: ${METRICS[6]}/${METRICS[5]} (${METRICS[6]} cobertos)"
+            echo "→ Linhas: ${METRICS[8]}/${METRICS[7]} (${METRICS[8]} cobertas)"
 
             echo ""
-            echo "💡 Dica: Verifique o relatório HTML para detalhes completos"
+            echo "💡 O JaCoCo pode contar:"
+            echo "- Construtores"
+            echo "- Métodos estáticos"
+            echo "- Inicializadores"
+            echo "- Métodos synthetic (gerados pelo compilador)"
           fi
