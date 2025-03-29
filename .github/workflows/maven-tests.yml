@@ -37,3 +37,8 @@ jobs:
             target/site/jacoco/
             target/checkstyle-result.xml
           retention-days: 3
+      - name: Display coverage summary
+        run: |
+          echo "✅ Cobertura de Código"
+          echo "======================"
+          grep -A 3 "COVERAGE SUMMARY" target/site/jacoco/jacoco.csv || echo "Relatório não gerado"
