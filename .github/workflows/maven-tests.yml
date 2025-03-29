@@ -24,43 +24,26 @@ jobs:
 
       - name: Run Checkstyle (Linter)
         run: mvn checkstyle:check
+
       - name: Run tests with coverage
-        run: |
-          mvn clean test jacoco:report
-          # Força a criação da pasta se não existir
-          mkdir -p target/site/jacoco/
+        run: mvn clean test jacoco:report
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco/
+          retention-days: 3
 
       - name: Display coverage summary
         run: |
           if [ -f "target/site/jacoco/jacoco.csv" ]; then
-            echo "✅ Cobertura de Código"
+            echo "📊 Cobertura de Código"
             echo "======================"
-            grep -A 3 "COVERAGE SUMMARY" target/site/jacoco/jacoco.csv
-            echo ""
-            echo "Relatório completo disponível em target/site/jacoco/index.html"
+            awk -F',' '/GROUP/ {print $2 " - Cobertura: " $4 "%"}' target/site/jacoco/jacoco.csv
           else
-            echo "❌ Relatório JaCoCo não encontrado em target/site/jacoco/"
-            echo "Arquivos gerados:"
-            find target/ -type f
+            echo "❌ Relatório não gerado. Verifique se:"
+            echo "1. Há classes em src/main/java"
+            echo "2. Os testes foram executados"
+            ls -R target/site/ || echo "Nenhum relatório encontrado"
           fi
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: |
-            target/site/jacoco/
-            target/jacoco-report/
-          retention-days: 3
-      - name: Publish Coverage Report
-        uses: mikepenz/action-jacoco-report@v2
-        if: success()
-        with:
-          paths: target/site/jacoco/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Display coverage summary
-        run: |
-          echo "✅ Cobertura de Código"
-          echo "======================"
-          grep -A 3 "COVERAGE SUMMARY" target/site/jacoco/jacoco.csv || echo "Relatório não gerado"
