@@ -35,26 +35,28 @@ jobs:
           path: target/site/jacoco/
           retention-days: 3
 
-      - name: Display accurate coverage
+      - name: Display smart coverage summary
         run: |
           if [ -f "target/site/jacoco/jacoco.csv" ]; then
-            echo "📊 Cobertura Real"
-            echo "================="
+            echo "📊 Cobertura Consolidada"
+            echo "======================="
 
-            # Extrai dados da sua classe específica
-            CLASS_DATA=$(grep "ArraySumChecker" target/site/jacoco/jacoco.csv)
-            IFS=',' read -r -a METRICS <<< "$CLASS_DATA"
+            # Processa todas as classes (ignora cabeçalho e linhas de pacote)
+            grep ",br.com.misterstorm.codechallenge," target/site/jacoco/jacoco.csv | while read -r LINE; do
+              IFS=',' read -r -a METRICS <<< "$LINE"
+              CLASS_NAME=${METRICS[2]##*.}  # Extrai só o nome da classe
 
-            echo "Método Principal:"
-            echo "----------------"
-            echo "→ Instruções: ${METRICS[4]}/${METRICS[3]} (${METRICS[4]} cobertas)"
-            echo "→ Branches: ${METRICS[6]}/${METRICS[5]} (${METRICS[6]} cobertos)"
-            echo "→ Linhas: ${METRICS[8]}/${METRICS[7]} (${METRICS[8]} cobertas)"
+              # Calcula porcentagens
+              TOTAL_INSTR=$(( ${METRICS[3]} + ${METRICS[4]} ))
+              COV_PERCENT=$(( ${METRICS[4]} * 100 / $TOTAL_INSTR ))
 
-            echo ""
-            echo "💡 O JaCoCo pode contar:"
-            echo "- Construtores"
-            echo "- Métodos estáticos"
-            echo "- Inicializadores"
-            echo "- Métodos synthetic (gerados pelo compilador)"
+              echo "▸ $CLASS_NAME:"
+              echo "  - Cobertura: $COV_PERCENT%"
+              echo "  - Métodos: ${METRICS[11]}/$(( ${METRICS[10]} + ${METRICS[11]} ))"
+              echo ""
+            done
+
+            echo "🔍 Detalhes completos: target/site/jacoco/index.html"
+          else
+            echo "❌ Relatório não encontrado"
           fi
