@@ -1,6 +1,7 @@
 package br.com.misterstorm.codechallenge;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class BalancedBrackets {
 
