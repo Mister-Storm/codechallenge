@@ -25,5 +25,13 @@ class BalancedBracketsTest {
 
         assertTrue(sut.isBalanced(balancedExpression));
     }
+    @Test
+    void ensureThatReturnsTrueWhenExpressionIsEmpty() {
+        var balancedExpression = "";
+
+        var sut = new BalancedBrackets();
+
+        assertTrue(sut.isBalanced(balancedExpression));
+    }
 
 }
